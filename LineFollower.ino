@@ -97,51 +97,6 @@
 #define REST 0
 //end defines-----------------------------------------------------------------------------------------------------
 
-
-// Global Variables------------------------------------------------------------------------------------------------
-SparkFun_APDS9960 apds = SparkFun_APDS9960();
-uint8_t proximity_data = 0;
-uint16_t ambient_light = 0;
-uint16_t red_light = 0;
-uint16_t green_light = 0;
-uint16_t blue_light = 0;
-
-
-//motor pins------------------------------------------------------------------------------------------------------
-const byte RIGHT_DIRECTION=10;//PH1
-const byte RIGHT_MOTOR=11;
-const byte LEFT_DIRECTION=6;//PH2
-const byte LEFT_MOTOR=5;
-const byte MODE=3;
-
-//motor speed------------------------------------------------------------------------------------------------------
-int LEFT_MOTOR_SPEED=0;
-int RIGHT_MOTOR_SPEED=0;
-
-//initial Motor Speed----------------------------------------------------------------------------------------------
-const int INITIAL_MOTOR_SPEED=150;
-
-
-//IR SENSORS--------------------------------------------------------------------------------------------------------
-const byte IR_Sensor_Num=7;
-const byte IR_Sensor_Pin[IR_Sensor_Num]={13,12,9,2,8,7,4};
-
-//Line Position-----------------------------------------------------------------------------------------------------
-long Line_Position=5; //5 is just so i can have 0 as msb
-
-//PID----------------------------------------------------------------------------------------------------------------
-int PID=0;
-int error=0;
-int P=0;
-int I=0;
-int D=0;
-int prevError=0;
-int prevI=0;
-//PID CONSTANTS-------------------------------------------------------------------------------------------------------
-const byte Kp=5;
-const byte Ki=0;
-const byte Kd=2;
-
 //MUSIC -------------------------------------------------------------------------------------------------------------------
 bool PLAYED_MUSIC=false;
 int melodywii[] = {
@@ -236,6 +191,53 @@ int noteDuration = 0;
 //end music-----------------------------------------------------------------------------------------------------------
 
 
+
+// Global Variables____________________________________________________________________________________________________________________________
+SparkFun_APDS9960 apds = SparkFun_APDS9960();
+uint8_t proximity_data = 0;
+uint16_t ambient_light = 0;
+uint16_t red_light = 0;
+uint16_t green_light = 0;
+uint16_t blue_light = 0;
+
+
+//motor pins------------------------------------------------------------------------------------------------------
+const byte RIGHT_DIRECTION=10;//PH1
+const byte RIGHT_MOTOR=11;
+const byte LEFT_DIRECTION=6;//PH2
+const byte LEFT_MOTOR=5;
+const byte MODE=3;
+
+//motor speed------------------------------------------------------------------------------------------------------
+int LEFT_MOTOR_SPEED=0;
+int RIGHT_MOTOR_SPEED=0;
+
+//initial Motor Speed----------------------------------------------------------------------------------------------
+const int INITIAL_MOTOR_SPEED=150;
+
+
+//IR SENSORS--------------------------------------------------------------------------------------------------------
+const byte IR_Sensor_Num=7;
+const byte IR_Sensor_Pin[IR_Sensor_Num]={13,12,9,2,8,7,4};
+
+//Line Position-----------------------------------------------------------------------------------------------------
+long Line_Position=5; //5 is just so i can have 0 as msb
+
+//PID----------------------------------------------------------------------------------------------------------------
+int PID=0;
+int error=0;
+int P=0;
+int I=0;
+int D=0;
+int prevError=0;
+int prevI=0;
+//PID CONSTANTS-------------------------------------------------------------------------------------------------------
+const byte Kp=5;
+const byte Ki=0;
+const byte Kd=2;
+
+//END GLOBAL VAR__________________________________________________________________________________________________________________________________________________________
+
 //print functions-------------------------------------------------------------------------------------------------------
 void print_Proxy()
 {
@@ -283,14 +285,14 @@ void printMotors()
     Serial.print("\t");
 }
 
-void print_DEBUG()
-{ 
-    print_Proxy();
-    print_Colors();
-    printMotors();
-    printIRDigital();
-    printErrorVal(); 
-}
+// void print_DEBUG()
+// { 
+//     print_Proxy();
+//     print_Colors();
+//     printMotors();
+//     printIRDigital();
+//     printErrorVal(); 
+// }
 //end print function-------------------------------------------------------------------------------------------------------
 
 //APDS9960----------------------------------------------------------------------------------------------------------------
@@ -536,8 +538,15 @@ void loop() {
     //update_Proxy(); //check proxy and if senses a block at 20 distance interrupt and stop the car and sense the color
     getLinePositionNum(); //get the line position from the IR sensors XXX-XXX
     getError();           //get the amount of sway off track
-    print_DEBUG();
-   // update_PID();//check PID
-   // set_motors();//set speed
+    
+    //--debug--
+  // print_Proxy();
+  // print_Colors();
+  //  printMotors();
+  //printIRDigital();
+  // printErrorVal(); 
+    update_PID();//check PID
+    set_motors();//set speed
+
     delay(1000);
 }

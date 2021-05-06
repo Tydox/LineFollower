@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "programmer": "arduino:arduinoasisp",
+    "programmer": "arduino:avrisp",
     "sketch": "LineFollower.ino",
-    "output": "../ArduinoOutputLineFollower"
+    "output": "../ArduinoOutputLineFollower",
 }
