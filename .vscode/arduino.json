@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "programmer": "arduino:arduinoasisp",
+    "sketch": "LineFollower.ino",
+    "output": "../ArduinoOutputLineFollower"
+}
