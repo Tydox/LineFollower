@@ -119,12 +119,12 @@ int LEFT_MOTOR_SPEED=0;
 int RIGHT_MOTOR_SPEED=0;
 
 //initial Motor Speed----------------------------------------------------------------------------------------------
-const int INITIAL_MOTOR_SPEED=100;
+const int INITIAL_MOTOR_SPEED=150;
 
 
 //IR SENSORS--------------------------------------------------------------------------------------------------------
-const byte IR_Sensor_Num=6;
-const byte IR_Sensor_Pin[IR_Sensor_Num]={13,12,9,8,7,6};
+const byte IR_Sensor_Num=7;
+const byte IR_Sensor_Pin[IR_Sensor_Num]={13,12,9,2,8,7,4};
 
 //Line Position-----------------------------------------------------------------------------------------------------
 long Line_Position=5; //5 is just so i can have 0 as msb
@@ -409,23 +409,26 @@ void getLinePositionNum(){
 //check line position and set an error value---------------------------------------------------------------------------------------
 void getError(){
     switch (Line_Position)    {
-    case 5111110:    {        error = -15;        break;    }
-    case 5111100:    {        error = -15;        break;    }
-    case 5111000:    {        error = -15;        break;    }
-    case 5100000:    {        error = -5;         break;    }
-    case 5110000:    {        error = -4;         break;    }
-    case 5010000:    {        error = -3;         break;    }
-    case 5011000:    {        error = -2;         break;    }
-    case 5001000:    {        error = -1;         break;    }
-    case 5001100:    {        error = 0;          break;    }
-    case 5000100:    {        error = 1;          break;    }
-    case 5000110:    {        error = 2;          break;    }
-    case 5000010:    {        error = 3;          break;    }
-    case 5000011:    {        error = 4;          break;    }
-    case 5000001:    {        error = 5;          break;    }//turn right
-    case 5000111:    {        error = 15;         break;    } //turn right
-    case 5001111:    {        error = 15;         break;    } //turn right
-    case 5011111:    {        error = 15;         break;    }//turn right
+    //case 5111110:    {        error = -15;        break;    }
+    //case 5111100:    {        error = -15;        break;    }
+    //case 5111000:    {        error = -15;        break;    }
+    case 51000000:    {        error = -6;         break;    }
+    case 51100000:    {        error = -5;         break;    }
+    case 51110000:    {        error = -4;         break;    }
+    case 50110000:    {        error = -3;         break;    }
+    case 50111000:    {        error = -2;         break;    }
+    case 50011000:    {        error = -1;          break;    }
+    case 50011100:    {        error = 0;          break;    }
+    case 50001100:    {        error = 1;          break;    }
+    case 50001110:    {        error = 2;          break;    }
+    case 50000110:    {        error = 3;          break;    }
+    case 50000111:    {        error = 4;          break;    }
+    case 50000011:    {        error = 5;          break;    }
+    case 50000001:    {        error = 6;          break;    }
+    
+    //case 5000111:    {        error = 15;         break;    } //turn right
+    //case 5001111:    {        error = 15;         break;    } //turn right
+    //case 5011111:    {        error = 15;         break;    }//turn right
     case 5000000:    {        error = 999;        break;    }//continue
     case 5111111:    {        error = 777;        break;    }//continue
     default:    { /*Serial.println("Unkown Error - Line Following Status");*/ break;    }
@@ -530,11 +533,11 @@ void setup() {
 }
 
 void loop() {
-    update_Proxy(); //check proxy and if senses a block at 20 distance interrupt and stop the car and sense the color
-   // getLinePositionNum(); //get the line position from the IR sensors XXX-XXX
-   // getError();           //get the amount of sway off track
-   // print_DEBUG();
+    //update_Proxy(); //check proxy and if senses a block at 20 distance interrupt and stop the car and sense the color
+    getLinePositionNum(); //get the line position from the IR sensors XXX-XXX
+    getError();           //get the amount of sway off track
+    print_DEBUG();
    // update_PID();//check PID
    // set_motors();//set speed
-    delay(500);
+    delay(1000);
 }
