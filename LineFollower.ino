@@ -218,7 +218,7 @@ const int INITIAL_MOTOR_SPEED=150;
 
 //IR SENSORS--------------------------------------------------------------------------------------------------------
 const byte IR_Sensor_Num=7;
-const byte IR_Sensor_Pin[IR_Sensor_Num]={13,12,9,2,8,7,4};
+const byte IR_Sensor_Pin[IR_Sensor_Num]={2,4,7,8,12,13,A1};
 
 //Line Position-----------------------------------------------------------------------------------------------------
 long Line_Position=5; //5 is just so i can have 0 as msb
