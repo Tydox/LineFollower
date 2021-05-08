@@ -3,10 +3,6 @@
 #include <SparkFun_APDS9960.h>
 //end libraries-------------------------------------------------------------------------------------------------
 
-//defines-------------------------------------------------------------------------------------------------------
-
-//end defines-----------------------------------------------------------------------------------------------------
-
 // Global Variables____________________________________________________________________________________________________________________________
 SparkFun_APDS9960 apds = SparkFun_APDS9960();
 uint8_t proximity_data = 0;
@@ -19,13 +15,14 @@ uint16_t blue_light = 0;
 bool PLAYED_MUSIC=false;
 byte buzzer = A0;
 
-
 //motor pins------------------------------------------------------------------------------------------------------
-const byte RIGHT_DIRECTION=10;//PH1
-const byte RIGHT_MOTOR=11;
-const byte LEFT_DIRECTION=6;//PH2
-const byte LEFT_MOTOR=5;
-const byte MODE=3;
+const byte LEFT_MOTOR = 11; //ena//left motor - set speed
+const byte LEFT_FORWARD = 10;//in1
+const byte LEFT_BACK = 9;//in2
+const byte RIGHT_FORWARD = 6;//in3
+const byte RIGHT_BACK = 5;//in4
+const byte RIGHT_MOTOR = 3;//enb//right motor - set speed
+
 
 //motor speed------------------------------------------------------------------------------------------------------
 int LEFT_MOTOR_SPEED=0;
@@ -56,6 +53,24 @@ const byte Ki=0;
 const byte Kd=2;
 
 //END GLOBAL VAR__________________________________________________________________________________________________________________________________________________________
+
+//declerations
+void update_Proxy();
+void musika();
+void update_Color();
+void set_speed(byte left, byte right);
+void set_motors();
+void update_PID();
+void set_direction(char dir);
+void getError();
+void getLinePositionNum();
+void printMotors();
+void printErrorVal();
+void printIRDigital();
+void print_Colors();
+void print_Proxy();
+//end declerations
+
 
 //print functions-------------------------------------------------------------------------------------------------------
 void print_Proxy()
@@ -166,6 +181,7 @@ void musika()
 
 //check proxy&play-----------------------------------------------------------------------------------------------------------------
 void update_Proxy(){
+
   if ( !apds.readProximity(proximity_data) ) {       
      Serial.println("Error reading proximity value");  
         } else {    
@@ -184,13 +200,6 @@ void update_Proxy(){
 //END APDS9960--------------------------------------------------------------------------------------------------------------------
 
 //MOTOR CONTROL--------------------------------------------------------------------------------------------------------------------
-
-//Iterate over the IR sensors, and create a 6digit num (sensor)*10+new sensor - 000000 001100 010000
-void getLinePositionNum(){
-    Line_Position = 5; //reset value
-    for (int i = 0; i < IR_Sensor_Num; ++i)
-        Line_Position = (Line_Position * 10) + digitalRead(IR_Sensor_Pin[i]);
-}
 
 //check line position and set an error value---------------------------------------------------------------------------------------
 void getError(){
@@ -221,6 +230,26 @@ void getError(){
     }
 }
 
+//set direction if wanting to turn ----------------------------------------------------------------------------------------------------
+void set_direction(char dir){
+   switch(dir) {
+    case 'F':  {  digitalWrite(LEFT_FORWARD, HIGH);  digitalWrite(LEFT_BACK, LOW);     digitalWrite(RIGHT_FORWARD, HIGH);   digitalWrite(RIGHT_BACK, LOW);     break;  }
+    case 'B':  {  digitalWrite(LEFT_FORWARD, LOW);   digitalWrite(LEFT_BACK, HIGH);    digitalWrite(RIGHT_FORWARD, LOW);    digitalWrite(RIGHT_BACK, HIGH);    break;  }
+    case 'L':  {  digitalWrite(LEFT_FORWARD, HIGH);  digitalWrite(LEFT_BACK, LOW);     digitalWrite(RIGHT_FORWARD, LOW);    digitalWrite(RIGHT_BACK, LOW);     break;  }
+    case 'R':  {  digitalWrite(LEFT_FORWARD, LOW);   digitalWrite(LEFT_BACK, LOW);     digitalWrite(RIGHT_FORWARD, HIGH);   digitalWrite(RIGHT_BACK, LOW);     break;  }
+    case 'S':  {  digitalWrite(LEFT_FORWARD, LOW);   digitalWrite(LEFT_BACK, LOW);     digitalWrite(RIGHT_FORWARD, LOW);    digitalWrite(RIGHT_BACK, LOW);     break;  }
+    case '<':  {  digitalWrite(LEFT_FORWARD, HIGH);  digitalWrite(LEFT_BACK, LOW);     digitalWrite(RIGHT_FORWARD, LOW);    digitalWrite(RIGHT_BACK, HIGH);    break;  }
+    case '>':  {  digitalWrite(LEFT_FORWARD, LOW);   digitalWrite(LEFT_BACK,HIGH);     digitalWrite(RIGHT_FORWARD, HIGH);   digitalWrite(RIGHT_BACK, LOW);     break;  }
+   }
+}
+
+//Iterate over the IR sensors, and create a 6digit num (sensor)*10+new sensor - 000000 001100 010000
+void getLinePositionNum(){
+    Line_Position = 5; //reset value
+    for (int i = 0; i < IR_Sensor_Num; ++i)
+        Line_Position = (Line_Position * 10) + digitalRead(IR_Sensor_Pin[i]);
+}
+
 //CALCULATE PID VALUE BASED ON ERRORS ----------------------------------------------------------------------------------------------
 void update_PID(){
 if (error != 777 && error != 999)//as long as its not white\black line calc a new pid value
@@ -236,74 +265,62 @@ if (error != 777 && error != 999)//as long as its not white\black line calc a ne
 
 //CONTROL MOTOR BASED ON PID----------------------------------------------------------------------------------------------------------
 void set_motors(){
-if (error == 777 || error == 999) //all black\white - skip
+if (error == 777)//all black
+{ 
+    analogWrite(LEFT_MOTOR, INITIAL_MOTOR_SPEED +5);  //Left Motor Speed
+    analogWrite(RIGHT_MOTOR, INITIAL_MOTOR_SPEED); //Right Motor Speed
+    set_direction('F');
+    return;
+}
+
+ if(error == 999) //all white - skip - do what you did last time until back on line
         return;
 
     LEFT_MOTOR_SPEED = INITIAL_MOTOR_SPEED + PID;
     RIGHT_MOTOR_SPEED= INITIAL_MOTOR_SPEED - PID;
 
  // The motor speed should not exceed the max PWM value
-    LEFT_MOTOR_SPEED = constrain(LEFT_MOTOR_SPEED, 0, 255);
+    LEFT_MOTOR_SPEED = constrain(LEFT_MOTOR_SPEED+5, 0, 255);
     RIGHT_MOTOR_SPEED = constrain(RIGHT_MOTOR_SPEED, 0, 255);
 
-    analogWrite(LEFT_MOTOR, LEFT_MOTOR_SPEED+5);  //Left Motor Speed
-    analogWrite(RIGHT_MOTOR, RIGHT_MOTOR_SPEED); //Right Motor Speed
-
+    set_speed(LEFT_MOTOR_SPEED,RIGHT_MOTOR_SPEED);
     set_direction('F');
 }
 
 //set motor analog speed--------------------------------------------------------------------------------------------------------------
 void set_speed(byte left, byte right){
-  analogWrite(LEFT_MOTOR, left+5);  //Left Motor Speed
+    analogWrite(LEFT_MOTOR, left+5);  //Left Motor Speed
     analogWrite(RIGHT_MOTOR, right); //Right Motor Speed
 }
 
-//set direction if wanting to turn ----------------------------------------------------------------------------------------------------
-//TURN - set wheels direction - 0=forward 1=backward
-void set_direction(char dir)
+void sharpturn()
 {
-    switch (dir)
-    {
-    case 'F':    {        digitalWrite(LEFT_DIRECTION, LOW);        digitalWrite(RIGHT_DIRECTION, LOW);          break;    }//forward
-    case 'B':    {        digitalWrite(LEFT_DIRECTION, HIGH);       digitalWrite(RIGHT_DIRECTION, HIGH);         break;    }//backwards
-   // case 'L':    {        digitalWrite(LEFT_DIRECTION, LOW);        analogWrite(RIGHT_MOTOR, 0);                 break;    }//left turn 90
-   // case 'R':    {        analogWrite(LEFT_MOTOR, 0);               digitalWrite(RIGHT_DIRECTION, LOW);          break;    }//right turn 90
-    case 'S':    {        analogWrite(LEFT_MOTOR, 0);               analogWrite(RIGHT_MOTOR, 0);                 break;    }//stop
-    }
 }
+
 
 //END MOTOR CONTROL--------------------------------------------------------------------------------------------------------------------
 
 
 void setup() {
   //total initialization time is 2 seconds + 1.2 seconds for starting buzzer
-  Serial.begin(9600);
-  while(!Serial); // wait for serial to be ready
-  // Initialize APDS-9960 (configure I2C and initial values)
-  if ( apds.init() ) {    Serial.println(F("APDS-9960 initialization complete"));  } else {    Serial.println(F("Something went wrong during APDS-9960 init!"));  }
-    // Wait for initialization and calibration to finish
-  delay(500);
-  // Adjust the Proximity sensor gain
-  if ( !apds.setProximityGain(PGAIN_2X) ) {    Serial.println(F("Something went wrong trying to set PGAIN"));  }
-    // Wait for initialization and calibration to finish
-  delay(500);
-  // Start running the APDS-9960 proximity sensor (no interrupts)
-  if ( apds.enableProximitySensor(false) ) {    Serial.println(F("Proximity sensor is now running"));  } else {    Serial.println(F("Something went wrong during sensor init!"));  }
-    // Wait for initialization and calibration to finish
-  delay(500);
-  // Start running the APDS-9960 light sensor (no interrupts)
-  if ( apds.enableLightSensor(false) ) {    Serial.println(F("Light sensor is now running"));  } else {    Serial.println(F("Something went wrong during light sensor init!"));  }
-    // Wait for initialization and calibration to finish
-  delay(500);
-  
+  Serial.begin(9600);  while(!Serial); // wait for serial to be ready
+  if ( apds.init() ) {    Serial.println(F("APDS-9960 initialization complete"));  } else {    Serial.println(F("Something went wrong during APDS-9960 init!"));  }  // Initialize APDS-9960 (configure I2C and initial values)
+  delay(500);// Wait for initialization and calibration to finish
+  if ( !apds.setProximityGain(PGAIN_2X) ) {    Serial.println(F("Something went wrong trying to set PGAIN"));  }  // Adjust the Proximity sensor gain
+  delay(500);    // Wait for initialization and calibration to finish
+  if ( apds.enableProximitySensor(false) ) {    Serial.println(F("Proximity sensor is now running"));  } else {    Serial.println(F("Something went wrong during sensor init!"));  }// Start running the APDS-9960 proximity sensor (no interrupts)
+  delay(500);    // Wait for initialization and calibration to finish
+  if ( apds.enableLightSensor(false) ) {    Serial.println(F("Light sensor is now running"));  } else {    Serial.println(F("Something went wrong during light sensor init!"));  }  // Start running the APDS-9960 light sensor (no interrupts)
+  delay(500);    // Wait for initialization and calibration to finish
 
   //Set Pins
-  pinMode(MODE,OUTPUT);
-  digitalWrite(MODE,HIGH); //set motor driver to PHASE ENABLE 
-  pinMode(RIGHT_DIRECTION,OUTPUT);
   pinMode(RIGHT_MOTOR,OUTPUT);
-  pinMode(LEFT_DIRECTION,OUTPUT);
+  pinMode(RIGHT_FORWARD,OUTPUT);
+  pinMode(RIGHT_BACK,OUTPUT);
   pinMode(LEFT_MOTOR,OUTPUT);
+  pinMode(LEFT_FORWARD,OUTPUT);
+  pinMode(LEFT_BACK,OUTPUT);
+
   
   //play a small audio to let the user know when it will start to move
   // tone(buzzer, 1000);
@@ -327,8 +344,8 @@ void loop() {
   // print_Proxy();
   // print_Colors();
   //  printMotors();
-  //printIRDigital();
-  // printErrorVal(); 
+    printIRDigital();
+    printErrorVal(); 
     update_PID();//check PID
     set_motors();//set speed
 
