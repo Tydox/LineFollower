@@ -6,7 +6,7 @@
 void update_Proxy();
 void musika();
 void update_Color();
-void set_speed(byte left, byte right);
+void set_speed(int left, int right);
 void set_motors();
 void update_PID();
 void set_direction(char dir);
@@ -17,6 +17,9 @@ void printErrorVal();
 void printIRDigital();
 void print_Colors();
 void print_Proxy();
+
+const int wait_period = 20;//non blocking delay for proximity sensor because it reads too much too fast
+unsigned long time_now = 0;
 
 // Global Variables____________________________________________________________________________________________________________________________
 SparkFun_APDS9960 apds = SparkFun_APDS9960();
@@ -44,8 +47,8 @@ int LEFT_MOTOR_SPEED=0;
 int RIGHT_MOTOR_SPEED=0;
 
 //initial Motor Speed----------------------------------------------------------------------------------------------
-const int INITIAL_MOTOR_SPEED=150;
-
+const byte INITIAL_MOTOR_SPEED=100;
+int olderror=0;
 
 //IR SENSORS--------------------------------------------------------------------------------------------------------
 const byte IR_Sensor_Num=7;
@@ -70,48 +73,49 @@ const byte Kd=2;
 //END GLOBAL VAR__________________________________________________________________________________________________________________________________________________________
 
 //print functions-------------------------------------------------------------------------------------------------------
-void print_Proxy()
-{
-  Serial.print(F("Proximity: "));
-  Serial.print(proximity_data);
-  Serial.println();
-}
+ void print_Proxy()
+ {
+   Serial.print(F("Proximity: "));
+   Serial.print(proximity_data);
+   Serial.println();
+ }
 
-void print_Colors()
-{
-  // Serial.print("\tAmbient: ");
-  //   Serial.print(ambient_light);
-  Serial.print(F("Red: "));
-  Serial.print(red_light);
-  Serial.print(F(" Green: "));
-  Serial.print(green_light);
-  Serial.print(F(" Blue: "));
-  Serial.println(blue_light);
-}
+ void print_Colors()
+ {
+   // Serial.print("\tAmbient: ");
+   //   Serial.print(ambient_light);
+   Serial.print(F("Red: "));
+   Serial.print(red_light);
+   Serial.print(F(" Green: "));
+   Serial.print(green_light);
+   Serial.print(F(" Blue: "));
+   Serial.println(blue_light);
+ }
 
-void printIRDigital()
-{
-  Serial.print(F("Digital Reading: "));
-  Serial.print(Line_Position);
-  Serial.print("\t");
-}
+ void printIRDigital()
+ {
+   Serial.print(F("Digital Reading: "));
+   Serial.print(Line_Position);
+   Serial.print("\t");
+ }
 
-void printErrorVal()
-{
-  Serial.print(F("Error Reading: "));
-  Serial.println(error);
-}
+ void printErrorVal()
+ {
+   Serial.print(F("Error Reading: "));
+   Serial.println(error);
+ }
 
-void printMotors()
-{
-  Serial.print(F("PID Value:  "));
-  Serial.print(PID);
-  Serial.print(F("\tLeft:  "));
-  Serial.print(LEFT_MOTOR_SPEED);
-  Serial.print(F("\tRight:  "));
-  Serial.print(RIGHT_MOTOR_SPEED);
+ void printMotors()
+ {
+   Serial.print(F("PID Value:  "));
+   Serial.print(PID);
+   Serial.print(F("   \tLeft:  "));
+   Serial.print(LEFT_MOTOR_SPEED);
+   Serial.print(F("\tRight:  "));
+   Serial.print(RIGHT_MOTOR_SPEED);
+   Serial.print("\t");
 
-}
+ }
 
 //end print function-------------------------------------------------------------------------------------------------------
 
@@ -156,7 +160,7 @@ void musika()
     if (green_light > 200 && green_light > red_light && green_light > blue_light)
     {
       for(int i=0;i<3;i++){
-        tone(buzzer, 2000);
+        tone(buzzer, 3000);
         delay(100);
         noTone(buzzer);
       }
@@ -170,33 +174,38 @@ void musika()
 void update_Proxy()
 {
   if ( !apds.readProximity(proximity_data) ) {       
-     Serial.println("Error reading proximity value");  
+ //    Serial.println("Error reading proximity value");  
         } else {    
                  if(proximity_data>=20)
                   { 
-                    set_speed(40,40); //slow down car
-                    while(proximity_data>=20 && proximity_data <230)//if you want to change distance 20 is start to slow down 230 is where to stop engines
+                    ///set_direction('B');
+                    set_speed(30,30); //slow down car
+                    while(proximity_data>10)//if you want to change distance 20 is start to slow down 230 is where to stop engines
                       { 
                         apds.readProximity(proximity_data); 
-                        print_Proxy();
-                        delay(100);//DEBUG
+                        //print_Proxy();
+                            while(millis() < time_now + wait_period){}
+                        //delay(20);//DEBUG
+                      if(proximity_data>=200){  set_speed(0,0); break; }
                       }
-                        if(proximity_data>=230){  set_speed(0,0); }      
+                              
                   }//stop car
                      PLAYED_MUSIC = false; 
-                     while(proximity_data>=100)    
+                     while(proximity_data>=150)    
                      {
                         apds.readProximity(proximity_data);
                         if (!PLAYED_MUSIC)
                         {
                           update_Color();
-                          print_Colors();
+                          //print_Colors();
                           
                         }
 
-                        delay(100); //DEBUG
+                        //delay(100); //DEBUG
                      }
+                      //set_direction('F');
                }
+               
 }
 
 //END APDS9960--------------------------------------------------------------------------------------------------------------------
@@ -208,25 +217,25 @@ void getError(){
     case 51111110:    {        error = -20;        break;    }
     case 51111100:    {        error = -20;        break;    }
     case 51111000:    {        error = -20;        break;    }
-    case 51000000:    {        error = -6;         break;    }
-    case 51100000:    {        error = -5;         break;    }
-    case 51110000:    {        error = -4;         break;    }
-    case 50110000:    {        error = -3;         break;    }
-    case 50111000:    {        error = -2;         break;    }
+    case 51000000:    {        error = -15;         break;    }
+    case 51100000:    {        error = -12;         break;    }
+    case 51110000:    {        error = -8;         break;    }
+    case 50110000:    {        error = -4;         break;    }
+    case 50111000:    {        error = -3;         break;    }
     case 50011000:    {        error = -1;         break;    }
     case 50011100:    {        error = 0;          break;    }
     case 50001100:    {        error = 1;          break;    }
-    case 50001110:    {        error = 2;          break;    }
-    case 50000110:    {        error = 3;          break;    }
-    case 50000111:    {        error = 4;          break;    }
-    case 50000011:    {        error = 5;          break;    }
-    case 50000001:    {        error = 6;          break;    }
+    case 50001110:    {        error = 3;          break;    }
+    case 50000110:    {        error = 4;          break;    }
+    case 50000111:    {        error = 8;          break;    }
+    case 50000011:    {        error = 12;          break;    }
+    case 50000001:    {        error = 15;          break;    }
     case 50001111:    {        error = 20;         break;    }
     case 50011111:    {        error = 20;         break;    } 
     case 50111111:    {        error = 20;         break;    }
-    case 50000000:    {        error = 999;        break;    }//continue
-    case 51111111:    {        error = 777;        break;    }//continue
-    default:    { /*Serial.println("Unkown Error - Line Following Status");*/ break;    }
+    case 50000000:    {        error = 555;        break;    }//do what you did last
+    case 51111111:    {        error = 777;        break;    }//go straight
+    default:    { /*Serial.println("Unkown Error - Line Following Status");*/error=555; break;    }
     }
 }
 
@@ -247,26 +256,31 @@ void set_direction(char dir){
 void getLinePositionNum()
 {
   Line_Position = 5; //reset value
-  for (int i = 0; i < IR_Sensor_Num; ++i)
+  for (byte i = 0; i < IR_Sensor_Num; ++i)
     Line_Position = (Line_Position * 10) + digitalRead(IR_Sensor_Pin[i]);
 }
 
 //CALCULATE PID VALUE BASED ON ERRORS ----------------------------------------------------------------------------------------------
-void update_PID(){
-if (error != 777 && error != 999)//as long as its not white\black line calc a new pid value
-    {
-        P = error;
-        I = I + prevI;
-        D = error - prevError;
-        PID = (Kp * P) + (Ki * I) + (Kd * D);
-        prevI = I;
-        prevError = error;
-    }
-}
+// void update_PID(){
+// if (error < 300)//as long as its not white\black line calc a new pid value
+//     {
+//         P = error;
+//         I = I + prevI;
+//         D = error - prevError;
+//         PID = (Kp * P) + (Ki * I) + (Kd * D);
+//         prevI = I;
+//         prevError = error;
+//     }
+// }
 
 //CONTROL MOTOR BASED ON PID----------------------------------------------------------------------------------------------------------
 void set_motors()
 {
+   if (error == 555 || error == 20 || error ==-20) //all white - skip - do what you did last time until back on line
+  {  
+    return;
+  }
+
   if (error == 777) //all black
   {
     analogWrite(LEFT_MOTOR, INITIAL_MOTOR_SPEED + 5); //Left Motor Speed
@@ -275,24 +289,24 @@ void set_motors()
     return;
   }
 
-  if (error == 999) //all white - skip - do what you did last time until back on line
-  {  
-    return;
-  }
+        P = error;
+        I = I + prevI;
+        D = error - prevError;
+        PID = (Kp * P) + (Ki * I) + (Kd * D);
+        prevI = I;
+        prevError = error;
 
-  LEFT_MOTOR_SPEED = INITIAL_MOTOR_SPEED + PID;
-  RIGHT_MOTOR_SPEED = INITIAL_MOTOR_SPEED - PID;
 
   // The motor speed should not exceed the max PWM value
-  LEFT_MOTOR_SPEED = constrain(LEFT_MOTOR_SPEED + 5, 0, 255);
-  RIGHT_MOTOR_SPEED = constrain(RIGHT_MOTOR_SPEED, 0, 255);
+  LEFT_MOTOR_SPEED = constrain(INITIAL_MOTOR_SPEED - PID, 0, 255);
+  RIGHT_MOTOR_SPEED = constrain(INITIAL_MOTOR_SPEED + PID, 0, 255);
 
   set_speed(LEFT_MOTOR_SPEED, RIGHT_MOTOR_SPEED);
   set_direction('F');
 }
 
 //set motor analog speed--------------------------------------------------------------------------------------------------------------
-void set_speed(byte left, byte right)
+void set_speed(int left, int right)
 {
   analogWrite(LEFT_MOTOR, left + 5); //Left Motor Speed
   analogWrite(RIGHT_MOTOR, right);   //Right Motor Speed
@@ -300,35 +314,48 @@ void set_speed(byte left, byte right)
 
 void sharpturn()
 {
-  if (error == -20 || error == 20) //check again to make sure the error is indeed a 90 degree turn
+  if (error == -20 || error == 20)  //check again to make sure the error is indeed a 90 degree turn
   {
-    getLinePositionNum();
-    getError();
-    if (error == 777) //if full black line is present -> exit function
-      return;
-  }
-  if (error = -20) //SHARP TURN LEFT
+    while (millis() < time_now + wait_period + 200) {
+      getLinePositionNum();
+      getError();
+      if (error == 777) {
+        Serial.print("black liNE");
+        return;
+      }  //if full black line is present -> exit function
+    }
+      getLinePositionNum();
+      getError();
+   if (error == -20) //SHARP TURN LEFT
   {
     set_direction('<');
     set_speed(INITIAL_MOTOR_SPEED, 0);
-    while (error < -4) //continue the turn until the robot is back on the line
+    while (error <= -4 || error >=4) //continue the turn until the robot is back on the line
     {
       getLinePositionNum();
       getError();
     }
+          Serial.println("<<<<SHARP");
+
     return;
   }
-  if (error = 20) //SHARP TURN RIGHT
+
+  if (error == 20) //SHARP TURN RIGHT
   {
     set_direction('>');
     set_speed(0, INITIAL_MOTOR_SPEED);
-    while (error > 4) //continue the turn until the robot is back on the line
+    while (error >= 4 || error <=-4) //continue the turn until the robot is back on the line
     {
       getLinePositionNum();
       getError();
     }
+              Serial.println(">>>SHARP");
+
     return;
   }
+
+  }
+  
 }
 
 //END MOTOR CONTROL--------------------------------------------------------------------------------------------------------------------
@@ -336,17 +363,17 @@ void sharpturn()
 
 void setup() {
   //total initialization time is 2 seconds + 1.2 seconds for starting buzzer
-  Serial.begin(9600);
-    while(!Serial); // wait for serial to be ready
+  Serial.begin(115200);
+  //  while(!Serial); // wait for serial to be ready
 
-   if ( apds.init() ) {    Serial.println(F("APDS-9960 initialization complete"));  } else {    Serial.println(F("Something went wrong during APDS-9960 init!"));  }  // Initialize APDS-9960 (configure I2C and initial values)
-  // delay(500);// Wait for initialization and calibration to finish
-  if ( !apds.setProximityGain(PGAIN_2X) ) {    Serial.println(F("Something went wrong trying to set PGAIN"));  }  // Adjust the Proximity sensor gain
-  // delay(500);    // Wait for initialization and calibration to finish
-   if ( apds.enableProximitySensor(false) ) {    Serial.println(F("Proximity sensor is now running"));  } else {    Serial.println(F("Something went wrong during sensor init!"));  }// Start running the APDS-9960 proximity sensor (no interrupts)
-  // delay(500);    // Wait for initialization and calibration to finish
-   if ( apds.enableLightSensor(false) ) {    Serial.println(F("Light sensor is now running"));  } else {    Serial.println(F("Something went wrong during light sensor init!"));  }  // Start running the APDS-9960 light sensor (no interrupts)
-  // delay(500);    // Wait for initialization and calibration to finish
+  apds.init(); // Initialize APDS-9960 (configure I2C and initial values)
+   delay(150);// Wait for initialization and calibration to finish
+  apds.setProximityGain(PGAIN_2X);  // Adjust the Proximity sensor gain
+   delay(150);    // Wait for initialization and calibration to finish
+   apds.enableProximitySensor(false);// Start running the APDS-9960 proximity sensor (no interrupts)
+   delay(150);    // Wait for initialization and calibration to finish
+   apds.enableLightSensor(false);  // Start running the APDS-9960 light sensor (no interrupts)
+   delay(150);    // Wait for initialization and calibration to finish
 
   //Set Pins
   pinMode(RIGHT_MOTOR,OUTPUT);
@@ -359,7 +386,7 @@ void setup() {
   
   //play a small audio to let the user know when it will start to move
   // tone(buzzer, 1000);
-  // delay(1000);  //wait to allow manual alignment
+   delay(150);  //wait to allow manual alignment
   // noTone(buzzer);
   // tone(buzzer, 2000);
   // delay(100);
@@ -371,19 +398,27 @@ void setup() {
 }
 
 void loop()
-{  
-
+{
+//update proxy to be interuupt!!!
+  if(millis()>=time_now + wait_period){
   update_Proxy(); //check proxy and if senses a block at 20 distance interrupt and stop the car and sense the color
+  time_now += wait_period;
+  }
+
+  olderror=error;
   getLinePositionNum(); //get the line position from the IR sensors XXX-XXX
-  getError();           //get the amount of sway off track
+  getError();
+             //get the amount of sway off track
+  if(error==olderror)
+      return;
+
   sharpturn();
+  set_motors(); //set speed
   //--debug--
   printMotors();
   printIRDigital();
   printErrorVal();
   
-  update_PID(); //check PID
-  set_motors(); //set speed
-
-  delay(1000);
+//  update_PID(); //check PID
+  //delay(300);
 }
