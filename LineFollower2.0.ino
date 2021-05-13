@@ -178,38 +178,40 @@ void update_Proxy() {
   } else {
     if (proximity_data >= 20) {
       set_speed(45, 45);  //slow down car
-     //     time_hold = millis();
-     // while(proximity_data>10)//if you want to change distance 20 is start to slow down 230 is where to stop engines
-     //   {
-     //     apds.readProximity(proximity_data);
-     //     //print_Proxy();
-     //     while(millis() < time_hold + wait_period){}//CHECK IF NEED TO MAKE THIS HIGHER!
-      //   if(proximity_data>=200){  set_speed(0,0); break; }
-    }
+      time_hold = millis();
+      while (proximity_data > 10)  //if you want to change distance 20 is start to slow down 230 is where to stop engines
+      {
+        apds.readProximity(proximity_data);
+        //print_Proxy();
+        while (millis() < time_hold + wait_period) {}  //CHECK IF NEED TO MAKE THIS HIGHER!
+        if (proximity_data >= 200) {
+          set_speed(0, 0);
+          break;
+        }
+      }
 
-  }  //stop car
-  time_hold = millis();
-  PLAYED_MUSIC = false;
-
-  while (proximity_data >= 20) {
-
-    if(millis() > time_hold + wait_period+70){
+    }  //stop car
     time_hold = millis();
-          apds.readProximity(proximity_data);
-          if(proximity_data>=50){
-     // Serial.print(time_hold);
-    if (!PLAYED_MUSIC) {
-      
-      update_Color();
+    PLAYED_MUSIC = false;
 
-    //print_Colors();
-    //print_P}roxy();
-    }
+    while (proximity_data >= 20) {
+
+      if (millis() > time_hold + wait_period + 70) {
+        time_hold = millis();
+        apds.readProximity(proximity_data);
+        if (proximity_data >= 50) {
+          // Serial.print(time_hold);
+          if (!PLAYED_MUSIC) {
+
+            update_Color();
+
+            //print_Colors();
+            //print_P}roxy();
+          }
+        }
+      }
     }
   }
-}}
-
-
 //END APDS9960--------------------------------------------------------------------------------------------------------------------
 
 //MOTOR CONTROL--------------------------------------------------------------------------------------------------------------------
