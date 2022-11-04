@@ -18,5 +18,5 @@ IDE: Arduino Pro 2.0
 Schematics: Fritzing
 Code Version Control: Github
 
-Physical:
+Lab Test Results:
 Speed: optimal ~100[cm/sec] , minimum – 50[cm/sec] , maximum - 350[cm/sec]
