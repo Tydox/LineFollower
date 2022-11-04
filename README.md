@@ -25,3 +25,9 @@ Speed: optimal ~100[cm/sec] , minimum – 50[cm/sec] , maximum - 350[cm/sec]
 
 ### Basic Flow Chart
 ![](https://github.com/Tydox/LineFollower/blob/master/Images/flowchart.png)
+
+### Circuit
+![](https://github.com/Tydox/LineFollower/blob/master/Images/circuit-diagram.png)
+
+### Final Product
+![](https://github.com/Tydox/LineFollower/blob/master/Images/car.png)
