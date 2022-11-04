@@ -20,3 +20,8 @@ Code Version Control: Github
 
 Lab Test Results:
 Speed: optimal ~100[cm/sec] , minimum – 50[cm/sec] , maximum - 350[cm/sec]
+
+
+
+### Basic Flow Chart
+![](https://github.com/Tydox/LineFollower/blob/master/Images/flowchart.png)
