@@ -22,6 +22,11 @@ Lab Test Results:
 Speed: optimal ~100[cm/sec] , minimum – 50[cm/sec] , maximum - 350[cm/sec]
 
 
+### UML
+![](https://github.com/Tydox/LineFollower/blob/master/Images/Data_variables.png)
+
+### Simplfied Algorithem
+![](https://github.com/Tydox/LineFollower/blob/master/Images/flowchart.png)
 
 ### Basic Flow Chart
 ![](https://github.com/Tydox/LineFollower/blob/master/Images/flowchart.png)
