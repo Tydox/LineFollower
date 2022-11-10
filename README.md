@@ -26,7 +26,7 @@ Speed: optimal ~100[cm/sec] , minimum – 50[cm/sec] , maximum - 350[cm/sec]
 ![](https://github.com/Tydox/LineFollower/blob/master/Images/Data_variables.png)
 
 ### Simplfied Algorithem
-![](https://github.com/Tydox/LineFollower/blob/master/Images/flowchart.png)
+![](https://github.com/Tydox/LineFollower/blob/master/Images/basic_flow.png)
 
 ### Basic Flow Chart
 ![](https://github.com/Tydox/LineFollower/blob/master/Images/flowchart.png)
