@@ -1,5 +1,9 @@
 # Arduino Line Follower w/ collision detection
 
+### Final Product
+![](https://github.com/Tydox/LineFollower/blob/master/Images/car.png)
+
+
 ## Hardware
 
 1. [1xArduino Uno 3](https://store.arduino.cc/products/arduino-uno-rev3)
@@ -34,5 +38,3 @@ Speed: optimal ~100[cm/sec] , minimum – 50[cm/sec] , maximum - 350[cm/sec]
 ### Circuit
 ![](https://github.com/Tydox/LineFollower/blob/master/Images/circuit-diagram.png)
 
-### Final Product
-![](https://github.com/Tydox/LineFollower/blob/master/Images/car.png)
